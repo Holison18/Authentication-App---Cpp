@@ -7,6 +7,8 @@
 using namespace std;
 
 class registrationLogin{
+    private:
+        int ID = 0;
     public:
         // constructor
         registrationLogin(){};
@@ -28,6 +30,15 @@ class registrationLogin{
 
         }
 
+        void checkusername(string username){
+            cout<<"Check username"<<endl;
+        }
+
+        int increaceIDByOne(){
+            this->ID += 1;
+            return ID;
+        }
+
 };
 
 int main(){
@@ -36,17 +47,23 @@ int main(){
 
     // main menu screen
     cout<<"\n\t\t\t\t**********Registration and Login*************"<<endl;
-    cout<<"[1] login"<<endl;
+    cout<<"\n[1] login"<<endl;
     cout<<"[1] Register an account"<<endl;
     cin>>option;
 
     if(option == 1){
         // create variables for user details
+        string firstname;
+        string lastname;
         string username;
+        string dateOfBirth;
+        int age;
         string email;
         string password;
 
         cout<<"\n\t\t\t**********Registration and Login*************"<<endl;
+        cout<<"\nfill the form below with your details"<<endl;
+
     }
 
 }
