@@ -46,9 +46,9 @@ int main(){
     int option;
 
     // main menu screen
-    cout<<"\n\t\t\t\t**********Registration and Login*************"<<endl;
+    cout<<"\n\t\t\t\t********** Main Menu *************"<<endl;
     cout<<"\n[1] login"<<endl;
-    cout<<"[1] Register an account"<<endl;
+    cout<<"[2] Register an account"<<endl;
     cin>>option;
 
     if(option == 1){
@@ -61,7 +61,7 @@ int main(){
         string email;
         string password;
 
-        cout<<"\n\t\t\t**********Registration*************"<<endl;
+        cout<<"\n\t\t\t********** Registration *************"<<endl;
         cout<<"\nfill the form below with your details"<<endl;
         cout<<"First name: ";
         cin>>firstname;
@@ -82,10 +82,12 @@ int main(){
         string username;
         string password;
 
-        cout<<"\n\t\t\t**********login*************"<<endl;
+        cout<<"\n\t\t\t********** login *************"<<endl;
         cout<<"\nUsername: ";
         cin>>username;
         cout<<"Password: ";
         cin>>password;
-
+    }else{
+        cout<<"Invalid option"<<endl;
+    }
 }
