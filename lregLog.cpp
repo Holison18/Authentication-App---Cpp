@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <fstream>
@@ -40,20 +41,27 @@ class registrationLogin{
         }
 
         string encryptPassword(const std::string& password, const std::string& key) {
-            const int keyLength = 32; // AES-256 key length
-            unsigned char iv[AES_BLOCK_SIZE] = {0}; // Initialization vector (IV)
-            unsigned char encryptedData[password.size() + AES_BLOCK_SIZE];
+            std::string encryptedPassword;
+            unsigned char iv[AES_BLOCK_SIZE];
+            memset(iv, 0x00, AES_BLOCK_SIZE);
 
-            EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-            EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, reinterpret_cast<const unsigned char*>(key.c_str()), iv);
-            EVP_EncryptUpdate(ctx, encryptedData, nullptr, reinterpret_cast<const unsigned char*>(password.c_str()), password.size());
-            int encryptedLength = 0;
-            EVP_EncryptFinal_ex(ctx, encryptedData + password.size(), &encryptedLength);
-            EVP_CIPHER_CTX_free(ctx);
+            AES_KEY aesKey;
+            if (AES_set_encrypt_key((unsigned char*)key.c_str(), 128, &aesKey) < 0) {
+                std::cerr << "Unable to set encryption key in AES" << std::endl;
+                return encryptedPassword;
+            }
 
-            std::string encryptedString(reinterpret_cast<const char*>(encryptedData), password.size() + encryptedLength);
-            return encryptedString;
-    }
+            int passwordLength = password.length();
+            int paddedLength = ((passwordLength / AES_BLOCK_SIZE) + 1) * AES_BLOCK_SIZE;
+            unsigned char* paddedPassword = new unsigned char[paddedLength];
+            memset(paddedPassword, 0x00, paddedLength);
+            memcpy(paddedPassword, password.c_str(), passwordLength);
+
+            AES_cbc_encrypt(paddedPassword, (unsigned char*)encryptedPassword.c_str(), paddedLength, &aesKey, iv, AES_ENCRYPT);
+            delete[] paddedPassword;
+
+            return encryptedPassword;
+        }
 
 };
 
