@@ -61,9 +61,31 @@ int main(){
         string email;
         string password;
 
-        cout<<"\n\t\t\t**********Registration and Login*************"<<endl;
+        cout<<"\n\t\t\t**********Registration*************"<<endl;
         cout<<"\nfill the form below with your details"<<endl;
+        cout<<"First name: ";
+        cin>>firstname;
+        cout<<"Last name: ";
+        cin>>lastname;
+        cout<<"Username: ";
+        cin>>username;
+        cout<<"Date of birth(DD/MM/YY): ";
+        cin>>dateOfBirth;
+        cout<<"Age: ";
+        cin>>age;
+        cout<<"Email: ";
+        cin>>email;
+        cout<<"Password: ";
+        cin>>password;
+    }else if(option == 2){
+        // create variables for user details
+        string username;
+        string password;
 
-    }
+        cout<<"\n\t\t\t**********login*************"<<endl;
+        cout<<"\nUsername: ";
+        cin>>username;
+        cout<<"Password: ";
+        cin>>password;
 
 }
