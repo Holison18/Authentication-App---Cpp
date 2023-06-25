@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
-#include <openssl/ssl.h>
+#include <openssl/aes.h>
+#include <openssl/evp.h>
+#include <fstream>
 
 
 
@@ -13,21 +15,19 @@ class registrationLogin{
         // constructor
         registrationLogin(){};
 
-        void registration(string username,string email, string password){
-            cout<<"Registration"<<endl;
+        void registration(string firstname,string lastname,string username,string DOB,int age,string email, string password){
+            // open myfile and append user details
+            fstream myflie ;
+            myflie.open("Database.txt",ios::app);
+            if(myflie.is_open()){
+                myflie<<increaceIDByOne()<<","<<firstname<<","<<lastname<<","<<username<<","<<DOB<<","<<age<<","<<email<<","<<encryptPassword(password,"key")<<endl;
+                myflie.close();
+            }
+
         }
 
         void login(string username,string password){
-            cout<<"Login"<<endl;
-        }
-
-        void checkpasswordlen(string password){
-            if(password.length() < 8){
-                cout<<"Password too short"<<endl;
-            }else{
-                cout<<"You can proceed"<<endl;
-            }
-
+            cout<<"Login"<<endl;cout<<"Registration"<<endl;
         }
 
         void checkusername(string username){
@@ -39,9 +39,28 @@ class registrationLogin{
             return ID;
         }
 
+        string encryptPassword(const std::string& password, const std::string& key) {
+            const int keyLength = 32; // AES-256 key length
+            unsigned char iv[AES_BLOCK_SIZE] = {0}; // Initialization vector (IV)
+            unsigned char encryptedData[password.size() + AES_BLOCK_SIZE];
+
+            EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+            EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, reinterpret_cast<const unsigned char*>(key.c_str()), iv);
+            EVP_EncryptUpdate(ctx, encryptedData, nullptr, reinterpret_cast<const unsigned char*>(password.c_str()), password.size());
+            int encryptedLength = 0;
+            EVP_EncryptFinal_ex(ctx, encryptedData + password.size(), &encryptedLength);
+            EVP_CIPHER_CTX_free(ctx);
+
+            std::string encryptedString(reinterpret_cast<const char*>(encryptedData), password.size() + encryptedLength);
+            return encryptedString;
+    }
+
 };
 
 int main(){
+    //create an of object of the class
+    registrationLogin regLog;
+
     // create a variable to take user response
     int option;
 
@@ -77,6 +96,8 @@ int main(){
         cin>>email;
         cout<<"Password: ";
         cin>>password;
+        regLog.registration(firstname,lastname,username,dateOfBirth,age,email,password);
+
     }else if(option == 2){
         // create variables for user details
         string username;
