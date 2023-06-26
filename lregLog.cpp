@@ -119,7 +119,7 @@ int main(){
         cin>>email;
         cout<<"Password: ";
         cin>>password;
-        regLog.registration(firstname,lastname,username,dateOfBirth,age,email,password);
+        regLog.registration(firstname,lastname,username,dateOfBirth,age,email,regLog.encryptPassword(password,"key"));
 
     }else if(option == 2){
         // create variables for user details
