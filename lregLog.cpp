@@ -1,68 +1,94 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <sstream>
 #include <openssl/aes.h>
 #include <openssl/evp.h>
+#include <openssl/rand.h> // Added header for AES_set_encrypt_key
 #include <fstream>
-
-
 
 using namespace std;
 
-class registrationLogin{
-    private:
-        int ID = 0;
-    public:
-        // constructor
-        registrationLogin(){};
+class registrationLogin {
+private:
+    int ID = 0;
 
-        void registration(string firstname,string lastname,string username,string DOB,int age,string email, string password){
-            // open myfile and append user details
-            fstream myflie ;
-            myflie.open("Database.txt",ios::app);
-            if(myflie.is_open()){
-                myflie<<increaceIDByOne()<<","<<firstname<<","<<lastname<<","<<username<<","<<DOB<<","<<age<<","<<email<<","<<encryptPassword(password,"key")<<endl;
-                myflie.close();
+public:
+    registrationLogin() {}
+
+    void registration(string firstname, string lastname, string username, string DOB, int age, string email, string password) {
+        fstream myfile;
+        myfile.open("Database.txt", ios::app);
+        if (myfile.is_open()) {
+            myfile << increaseIDByOne() << "," << firstname << "," << lastname << "," << username << "," << DOB << "," << age << "," << email << "," << encryptPassword(password, "key") << endl;
+            myfile.close();
+        }
+    }
+
+    void login(string username, string password) {
+        fstream myfile;
+        myfile.open("Database.txt", ios::in);
+        if (myfile.is_open()) {
+            string line;
+            stringstream ssin; // Move the declaration here
+            while (getline(myfile, line)) {
+                string data[8];
+                int i = 0;
+                ssin.str(line); // Set the line to the stringstream
+                ssin.clear(); // Clear the state flags of the stringstream
+                while (ssin.good() && i < 8) {
+                    ssin >> data[i];
+                    ++i;
+                }
+                if (data[3] == username) {
+                    if (data[7] == encryptPassword(password, "key")) {
+                        cout << "Login successful" << endl;
+                    } else {
+                        cout << "Incorrect password" << endl;
+                    }
+                    return; // Exit the function after finding the username
+                }
             }
-
+            cout << "Incorrect username" << endl; // Username not found
+            myfile.close();
         }
+    }
 
-        void login(string username,string password){
-            cout<<"Login"<<endl;cout<<"Registration"<<endl;
-        }
 
-        void checkusername(string username){
-            cout<<"Check username"<<endl;
-        }
+    void checkusername(string username) {
+        cout << "Check username" << endl;
+    }
 
-        int increaceIDByOne(){
-            this->ID += 1;
-            return ID;
-        }
+    int increaseIDByOne() {
+        return ++ID;
+    }
 
-        string encryptPassword(const std::string& password, const std::string& key) {
-            std::string encryptedPassword;
-            unsigned char iv[AES_BLOCK_SIZE];
-            memset(iv, 0x00, AES_BLOCK_SIZE);
+    string encryptPassword(const string& password, const string& key) {
+        string encryptedPassword;
+        unsigned char iv[AES_BLOCK_SIZE];
+        memset(iv, 0x00, AES_BLOCK_SIZE);
 
-            AES_KEY aesKey;
-            if (AES_set_encrypt_key((unsigned char*)key.c_str(), 128, &aesKey) < 0) {
-                std::cerr << "Unable to set encryption key in AES" << std::endl;
-                return encryptedPassword;
-            }
-
-            int passwordLength = password.length();
-            int paddedLength = ((passwordLength / AES_BLOCK_SIZE) + 1) * AES_BLOCK_SIZE;
-            unsigned char* paddedPassword = new unsigned char[paddedLength];
-            memset(paddedPassword, 0x00, paddedLength);
-            memcpy(paddedPassword, password.c_str(), passwordLength);
-
-            AES_cbc_encrypt(paddedPassword, (unsigned char*)encryptedPassword.c_str(), paddedLength, &aesKey, iv, AES_ENCRYPT);
-            delete[] paddedPassword;
-
+        AES_KEY aesKey;
+        if (AES_set_encrypt_key((unsigned char*)key.c_str(), 128, &aesKey) < 0) {
+            cerr << "Unable to set encryption key in AES" << endl;
             return encryptedPassword;
         }
 
+        int passwordLength = password.length();
+        int paddedLength = ((passwordLength / AES_BLOCK_SIZE) + 1) * AES_BLOCK_SIZE;
+        unsigned char* paddedPassword = new unsigned char[paddedLength];
+        memset(paddedPassword, 0x00, paddedLength);
+        memcpy(paddedPassword, password.c_str(), passwordLength);
+
+        unsigned char* encryptedData = new unsigned char[paddedLength];
+        AES_cbc_encrypt(paddedPassword, encryptedData, paddedLength, &aesKey, iv, AES_ENCRYPT);
+        encryptedPassword.assign(reinterpret_cast<const char*>(encryptedData), paddedLength);
+
+        delete[] paddedPassword;
+        delete[] encryptedData;
+
+        return encryptedPassword;
+    }
 };
 
 int main(){
