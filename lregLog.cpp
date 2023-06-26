@@ -63,31 +63,20 @@ public:
         return ++ID;
     }
 
-    string encryptPassword(const string& password, const string& key) {
-        string encryptedPassword;
-        unsigned char iv[AES_BLOCK_SIZE];
-        memset(iv, 0x00, AES_BLOCK_SIZE);
+    string encryptPassword(const std::string& password, const std::string& key) {
+        const int keyLength = 32; // AES-256 key length
+        unsigned char iv[AES_BLOCK_SIZE] = {0}; // Initialization vector (IV)
+        unsigned char encryptedData[password.size() + AES_BLOCK_SIZE];
 
-        AES_KEY aesKey;
-        if (AES_set_encrypt_key((unsigned char*)key.c_str(), 128, &aesKey) < 0) {
-            cerr << "Unable to set encryption key in AES" << endl;
-            return encryptedPassword;
-        }
+        EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+        EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, reinterpret_cast<const unsigned char*>(key.c_str()), iv);
+        EVP_EncryptUpdate(ctx, encryptedData, nullptr, reinterpret_cast<const unsigned char*>(password.c_str()), password.size());
+        int encryptedLength = 0;
+        EVP_EncryptFinal_ex(ctx, encryptedData + password.size(), &encryptedLength);
+        EVP_CIPHER_CTX_free(ctx);
 
-        int passwordLength = password.length();
-        int paddedLength = ((passwordLength / AES_BLOCK_SIZE) + 1) * AES_BLOCK_SIZE;
-        unsigned char* paddedPassword = new unsigned char[paddedLength];
-        memset(paddedPassword, 0x00, paddedLength);
-        memcpy(paddedPassword, password.c_str(), passwordLength);
-
-        unsigned char* encryptedData = new unsigned char[paddedLength];
-        AES_cbc_encrypt(paddedPassword, encryptedData, paddedLength, &aesKey, iv, AES_ENCRYPT);
-        encryptedPassword.assign(reinterpret_cast<const char*>(encryptedData), paddedLength);
-
-        delete[] paddedPassword;
-        delete[] encryptedData;
-
-        return encryptedPassword;
+        std::string encryptedString(reinterpret_cast<const char*>(encryptedData), password.size() + encryptedLength);
+        return encryptedString;
     }
 };
 
@@ -142,6 +131,7 @@ int main(){
         cin>>username;
         cout<<"Password: ";
         cin>>password;
+        regLog.login(username,password);
     }else{
         cout<<"Invalid option"<<endl;
     }
