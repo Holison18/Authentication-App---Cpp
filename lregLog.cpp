@@ -101,7 +101,7 @@ int main(){
         string dateOfBirth;
         int age;
         string email;
-        string password;
+        string* password;
 
         cout<<"\n\t\t\t********** Registration *************"<<endl;
         cout<<"\nfill the form below with your details"<<endl;
@@ -118,8 +118,8 @@ int main(){
         cout<<"Email: ";
         cin>>email;
         cout<<"Password: ";
-        cin>>password;
-        regLog.registration(firstname,lastname,username,dateOfBirth,age,email,regLog.encryptPassword(password,"key"));
+        cin>>*password;
+        regLog.registration(firstname,lastname,username,dateOfBirth,age,email,regLog.encryptPassword(*password,"key"));
 
     }else if(option == 2){
         // create variables for user details
